@@ -1,9 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
-	"ride-sharing/shared/contracts"
+
+	"ride-sharing/shared/env"
+)
+
+var (
+	tripServiceURL = env.GetString("TRIP_SERVICE_URL", "http://trip-service:8083")
 )
 
 func handleTripPreview(w http.ResponseWriter, r *http.Request) {
@@ -12,18 +20,41 @@ func handleTripPreview(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to parse JSON data", http.StatusBadRequest)
 		return
 	}
-
 	defer r.Body.Close()
 
-	//validation
-
+	// Validation
 	if reqBody.UserID == "" {
 		http.Error(w, "userID is required", http.StatusBadRequest)
 		return
 	}
 
-	response := contracts.APIResponse{Data: "ok"}
+	// Forward request to trip-service
+	jsonBody, err := json.Marshal(reqBody)
+	if err != nil {
+		http.Error(w, "failed to marshal request", http.StatusInternalServerError)
+		return
+	}
 
-	//TODO: call trip servcie
-	writeJSON(w, http.StatusCreated, response)
+	tripResp, err := http.Post(
+		fmt.Sprintf("%s/trip/preview", tripServiceURL),
+		"application/json",
+		bytes.NewBuffer(jsonBody),
+	)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to call trip service: %v", err), http.StatusInternalServerError)
+		return
+	}
+	defer tripResp.Body.Close()
+
+	// Read response from trip-service
+	body, err := io.ReadAll(tripResp.Body)
+	if err != nil {
+		http.Error(w, "failed to read trip service response", http.StatusInternalServerError)
+		return
+	}
+
+	// Forward the response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(tripResp.StatusCode)
+	w.Write(body)
 }

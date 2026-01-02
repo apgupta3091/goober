@@ -24,6 +24,12 @@ spec:
             limits:
               memory: "128Mi"
               cpu: "200m"
+          env:
+            - name: HTTP_ADDR
+              valueFrom:
+                configMapKeyRef:
+                  key: TRIP_HTTP_ADDR
+                  name: app-config
 ---
 apiVersion: v1
 kind: Service
