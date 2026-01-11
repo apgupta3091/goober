@@ -21,8 +21,8 @@ func main() {
 	log.Println("Starting API Gateway")
 
 	mux.HandleFunc("POST /trip/preview", handleTripPreview)
-	mux.HandleFunc("POST /ws/drivers", handleDriversWebSocket)
-	mux.HandleFunc("POST /ws/riders", handleRidersWebSocket)
+	mux.HandleFunc("GET /ws/drivers", handleDriversWebSocket)
+	mux.HandleFunc("GET /ws/riders", handleRidersWebSocket)
 
 	server := &http.Server{
 		Addr:    httpAddr,
