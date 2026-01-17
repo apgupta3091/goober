@@ -20,9 +20,9 @@ func main() {
 	mux := http.NewServeMux()
 	log.Println("Starting API Gateway")
 
-	mux.HandleFunc("POST /trip/preview", handleTripPreview)
-	mux.HandleFunc("GET /ws/drivers", handleDriversWebSocket)
-	mux.HandleFunc("GET /ws/riders", handleRidersWebSocket)
+	mux.HandleFunc("POST /trip/preview", enableCORS(handleTripPreview))
+	mux.HandleFunc("GET /ws/drivers", enableCORS(handleDriversWebSocket))
+	mux.HandleFunc("GET /ws/riders", enableCORS(handleRidersWebSocket))
 
 	server := &http.Server{
 		Addr:    httpAddr,
