@@ -50,7 +50,6 @@ func handleDriversWebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Send driver registration confirmation
 	msg := contracts.WSMessage{
 		Type: "driver.cmd.register",
 		Data: Driver{
