@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
+	"ride-sharing/services/api-gateway/grpc_clients"
 	"ride-sharing/shared/env"
 )
 
@@ -37,6 +39,15 @@ func handleTripPreview(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to marshal request", http.StatusInternalServerError)
 		return
 	}
+
+	tripService, err := grpc_clients.NewTripServiceClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer tripService.Close()
+
+	// tripService.Client.PreviewTrip()
 
 	tripResp, err := http.Post(
 		fmt.Sprintf("%s/trip/preview", tripServiceURL),
